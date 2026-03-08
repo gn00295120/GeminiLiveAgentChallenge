@@ -33,7 +33,13 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     try {
       // Get a session ID from the backend
       const res = await fetch('/api/session')
+      if (!res.ok) {
+        throw new Error(`Failed to create session: ${res.status} ${res.statusText}`)
+      }
       const { session_id } = await res.json()
+      if (!session_id) {
+        throw new Error('Server returned empty session ID')
+      }
 
       // Build WebSocket URL with optional API key
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'

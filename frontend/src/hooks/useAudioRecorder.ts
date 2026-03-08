@@ -11,6 +11,7 @@ export function useAudioRecorder({ onAudioData }: UseAudioRecorderOptions) {
   const streamRef = useRef<MediaStream | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
   const animFrameRef = useRef<number | null>(null)
+  const captureNodeRef = useRef<AudioWorkletNode | null>(null)
   const onAudioDataRef = useRef(onAudioData)
   onAudioDataRef.current = onAudioData
 
@@ -34,6 +35,7 @@ export function useAudioRecorder({ onAudioData }: UseAudioRecorderOptions) {
 
       const source = audioContext.createMediaStreamSource(stream)
       const captureNode = new AudioWorkletNode(audioContext, 'capture-worklet')
+      captureNodeRef.current = captureNode
 
       // Receive PCM data from worklet
       captureNode.port.onmessage = (event) => {
@@ -74,6 +76,11 @@ export function useAudioRecorder({ onAudioData }: UseAudioRecorderOptions) {
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current)
       animFrameRef.current = null
+    }
+    if (captureNodeRef.current) {
+      captureNodeRef.current.port.onmessage = null
+      captureNodeRef.current.disconnect()
+      captureNodeRef.current = null
     }
     if (audioContextRef.current) {
       audioContextRef.current.close()

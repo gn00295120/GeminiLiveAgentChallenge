@@ -32,8 +32,11 @@ export function useScreenShare({
       await videoElement.play()
 
       // Handle user clicking "Stop sharing" in the browser UI
-      stream.getVideoTracks()[0].onended = () => {
-        stopSharing()
+      const videoTrack = stream.getVideoTracks()[0]
+      if (videoTrack) {
+        videoTrack.onended = () => {
+          stopSharing()
+        }
       }
 
       const canvas = document.createElement('canvas')
@@ -45,6 +48,9 @@ export function useScreenShare({
         const video = videoRef.current
         let width = video.videoWidth
         let height = video.videoHeight
+
+        // Skip zero-size frames (stream not ready yet)
+        if (width === 0 || height === 0) return
 
         if (width > maxWidth) {
           height = (height * maxWidth) / width

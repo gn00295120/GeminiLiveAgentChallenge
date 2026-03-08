@@ -54,8 +54,9 @@ if os.path.exists(static_dir):
 
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
-        file_path = os.path.join(static_dir, full_path)
-        if os.path.exists(file_path) and os.path.isfile(file_path):
+        file_path = os.path.realpath(os.path.join(static_dir, full_path))
+        # Prevent path traversal: ensure resolved path is within static_dir
+        if file_path.startswith(os.path.realpath(static_dir)) and os.path.isfile(file_path):
             return FileResponse(file_path)
         return FileResponse(os.path.join(static_dir, "index.html"))
 

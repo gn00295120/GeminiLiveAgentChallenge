@@ -7,6 +7,7 @@ export function useAudioPlayer() {
 
   const initialize = useCallback(async () => {
     if (initializedRef.current) return
+    initializedRef.current = true  // Set early to prevent double-init race
 
     const audioContext = new AudioContext({ sampleRate: 24000 })
     audioContextRef.current = audioContext
@@ -16,8 +17,6 @@ export function useAudioPlayer() {
     const playbackNode = new AudioWorkletNode(audioContext, 'playback-worklet')
     playbackNode.connect(audioContext.destination)
     workletNodeRef.current = playbackNode
-
-    initializedRef.current = true
   }, [])
 
   const playAudio = useCallback((data: ArrayBuffer) => {

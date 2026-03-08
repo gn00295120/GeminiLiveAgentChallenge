@@ -24,7 +24,7 @@ export function useCameraCapture({
   const startCamera = useCallback(async (videoElement: HTMLVideoElement): Promise<boolean> => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
       })
       streamRef.current = stream
       videoRef.current = videoElement
@@ -42,6 +42,9 @@ export function useCameraCapture({
         const video = videoRef.current
         let width = video.videoWidth
         let height = video.videoHeight
+
+        // Skip zero-size frames (camera not ready yet)
+        if (width === 0 || height === 0) return
 
         // Resize if needed
         if (width > maxWidth) {

@@ -52,5 +52,5 @@ def create_agent() -> Agent:
         tools=[google_search, math_solver, concept_explainer, quiz_generator],
     )
 
-# Default instance for backward compatibility
+# ADK expects root_agent at module level
 root_agent = create_agent()

@@ -29,7 +29,8 @@ async def handle_websocket(websocket: WebSocket, session_id: str, api_key: str |
         await websocket.close()
         return
 
-    # Set the API key for this session
+    # Set the API key for this session (process-wide; acceptable for single-user Cloud Run instances)
+    # Note: For multi-tenant deployments, use per-client genai configuration instead
     os.environ["GOOGLE_API_KEY"] = effective_key
 
     # Create ADK runner with agent
@@ -63,7 +64,8 @@ async def handle_websocket(websocket: WebSocket, session_id: str, api_key: str |
                     if event.content and event.content.parts:
                         for part in event.content.parts:
                             if part.inline_data and part.inline_data.mime_type and "audio" in part.inline_data.mime_type:
-                                await websocket.send_bytes(part.inline_data.data)
+                                if part.inline_data.data is not None:
+                                    await websocket.send_bytes(part.inline_data.data)
                             elif part.text and not getattr(event, 'output_transcription', None):
                                 await websocket.send_json({
                                     "type": "transcript",
